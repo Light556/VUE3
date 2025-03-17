@@ -1,27 +1,3 @@
-# 问题
-
-在vscode终端中如果报错如下
-
-![image-20250221103859075](C:\Users\ziyix\Desktop\VUE3\Vue3.assets/image-20250221103859075.png)
-
-这个错误是由于Windows系统的执行策略限制导致的
-
-需要按win+x以管理员身份打开powershell然后输入以下代码
-
-```
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
-```
-
-
-
-```
-Get-ExecutionPolicy -List
-```
-
-执行后，你应该能看到CurrentUser的执行策略已经变为RemoteSigned
-
-
-
 # 各函数的定义及其用法
 
 ## alert
@@ -58,7 +34,37 @@ data(){
 
 
 
-# vite
+## beforeCreate()
+
+在实例初始化完成并且 props 被解析后立即调用。
+
+接着 props 会被定义成响应式属性，`data()` 和 `computed` 等选项也开始进行处理。
+
+注意，组合式 API 中的 `setup()` 钩子会在所有选项式 API 钩子之前调用，`beforeCreate()` 也不例外。
+
+
+
+## defineOptions()
+
+- 仅在 3.3+ 中支持
+
+这个宏可以用来直接在 `<script setup>` 中声明组件选项，而不必使用单独的 `<script>` 块：
+
+- 这是一个宏定义，选项将会被提升到模块作用域中，无法访问 `<script setup>` 中不是字面常数的局部变量。
+
+```
+<script lang="ts">
+  defineOptions({
+  name: 'Person'
+})
+</script>
+```
+
+
+
+
+
+# vite介绍
 
 vite是新一代前端构建工具，其特点有
 
@@ -72,7 +78,7 @@ vite是新一代前端构建工具，其特点有
 
   ![image-20250307113322098](Vue3.assets/image-20250307113322098.png)
 
-## 使用cmd部署一个项目
+# 使用cmd部署一个项目
 
 ```vue
 ## 创建命令
@@ -172,7 +178,7 @@ createApp(App).mount('#app')
 
 
 
-## 实现一个简单的效果
+# 实现一个简单的效果
 
 Person
 
@@ -267,9 +273,9 @@ export default {
 
 
 
-## 两种API的区别
+# 两种API的区别
 
-### Options API 的弊端
+## Options API 的弊端
 
 Options类型的API，数据，方法，计算属性等，是分散在：data，methods，computed中的，如果想要新增或修改一个需求，就需要分别修改：data，methods，computed。不利于维护
 
@@ -277,7 +283,7 @@ Options类型的API，数据，方法，计算属性等，是分散在：data，
 
 
 
-### composition  API 的优势
+## composition  API 的优势
 
 可以用函数的方式，更加优雅的组织代码，让相关功能代码更有序的组织在一起。
 
@@ -285,7 +291,7 @@ Options类型的API，数据，方法，计算属性等，是分散在：data，
 
 
 
-## setup概述
+# setup概述
 
 在vue3中，可以写多个根标签，而vue2中则不被允许。
 
@@ -390,13 +396,146 @@ export default {
 
 
 
+# setup 和 OptionsAPI 的关系
+
+主要描述的是旧语法和新语法之间的读取关系
+
+**Person.vue**
+
+```vue
+<template>
+    <div class="person">
+        <h2>姓名：{{name}}</h2> 
+        <h2>年龄：{{ age }}</h2>
+        <button @click="ChangeName">修改名字</button>
+        <button @click="ChangeAge">修改年龄</button>
+        <button @click="showTel">查看联系方式</button>
+        <hr>
+        <h2>测试1:{{ a }}</h2> 
+        <h2>测试2:{{ c }}</h2>
+        <h2>测试3:{{ d }}</h2>
+        <button @click="b">测试</button>
+    </div>
+</template>
+
+<script lang="ts">
+    export default{
+        name:'Person',
+        // 由于setup在所有生命周期之前，所以可以同时使用选项式语法和vue3中的setup语法共存
+        // 旧语法是可以从新语法中读取数据的，反之不行
+        data(){
+            return{
+                a:100,
+                c:this.name,
+                d:900
+            }
+        },
+        methods:{
+            b(){
+                console.log('b')
+            }
+        },
+        setup(){
+            let name = 'zhangsan'
+            let age = 18
+            let tel = '666161616161'
+            // 不能从vue3的写法中读取vue2中的数据
+            // let x = d
+            
+            function ChangeName(){
+                console.log(1)        
+                name = "haohao"
+                console.log(name)
+            }
+            function ChangeAge(){
+                age += 1
+            }
+            function showTel(){
+                alert(tel)
+            }
+            
+            return{name,age,tel,ChangeName,ChangeAge,showTel}
+        }
+    }
+
+</script>
+
+<style scoped>
+.person{
+    background-color:skyblue;
+    box-shadow: 0 0 10px;
+    border-radius: 10px;
+    padding: 20px;
+}
+    button{
+        margin: 0 5px;
+    }
+
+</style>
+```
 
 
 
+# setup 语法糖
 
+**Person.vue**
 
+```vue
+<template>
+    <div class="person">
+        <h2>姓名：{{name}}</h2> 
+        <h2>年龄：{{ age }}</h2>
+        <button @click="ChangeName">修改名字</button>
+        <button @click="ChangeAge">修改年龄</button>
+        <button @click="showTel">查看联系方式</button>
+        <button @click="showaddress"> 查看地址 </button>
+    </div>
+</template>
 
+<!-- 这里的script作用仅仅变成修改名称的用法，看上去有点多余了，下面会有一个叠加的方法 -->
+<!-- <script lang="ts">
+    // export default{
+    //     name:'Person',
+    // }  因为在第一个<script>块中使用了不完整的语法。虽然你定义了name属性，但TypeScript期望看到一个完整的语句或声明。
+    defineOptions({
+  name: 'Person'
+})
+</script> -->
 
+<!-- 使用set up 语法糖之后，只需要专注内容和方法的编写即可，无需在意返回问题，该语法糖会自动返回 -->
+<script lang="ts" setup name="Person234">
+        let name = 'zhangsan'
+        let age = 18
+        let tel = '666161616161'
+        let address = 'hao hao live in 硕果时代'
+        
+        function ChangeName(){
+            console.log(1)        
+            name = "haohao"
+            console.log(name)
+        }
+        function ChangeAge(){
+        age += 1
+        }
+        function showTel(){
+            alert(tel)
+        }
+        function showaddress(){
+            alert(address)
+        }
+</script>
 
+<style scoped>
+.person{
+    background-color:skyblue;
+    box-shadow: 0 0 10px;
+    border-radius: 10px;
+    padding: 20px;
+}
+    button{
+        margin: 0 5px;
+    }
 
+</style>
+```
 
