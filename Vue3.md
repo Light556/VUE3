@@ -62,7 +62,51 @@ data(){
 
 
 
+## ref()
 
+接受一个内部值，返回一个响应式的、可更改的 ref 对象，此对象只有一个指向其内部值的属性 `.value`。
+
+
+
+## v-for
+
+类似foreach，用来遍历数组的
+
+`v-for` 是一个指令，它的主要作用是基于一个数组、对象或者数字范围来渲染列表。借助 `v-for`，可以轻松地遍历数据集合，并且为集合中的每个元素生成对应的 DOM 元素。
+
+`v-for` 指令通常有以下几种常见的使用形式：
+
+- **遍历数组**：`item in items`，其中 `items` 是数组，`item` 是当前遍历到的数组元素。
+- **遍历对象**：`(value, key) in object`，`object` 是对象，`value` 是对象的属性值，`key` 是对象的属性名。
+- **遍历数字范围**：`n in 10`，这里会从 1 到 10 进行遍历。
+
+
+
+## v-bind
+
+`v-bind` 是一个指令，用于动态地绑定一个或多个属性，或者一个组件的 prop 到表达式。其主要作用是将数据绑定到 HTML 元素的属性上，使得这些属性的值可以随着 Vue 实例中数据的变化而动态更新。
+
+- **缩写：**
+
+  - `:` 或者 `.` (当使用 `.prop` 修饰符)
+  - 值可以省略 (当 attribute 和绑定的值同名时，需要 3.4+ 版本)
+
+  当用于绑定 `class` 或 `style` attribute，`v-bind` 支持额外的值类型如数组或对象。
+
+  在处理绑定时，Vue 默认会利用 `in` 操作符来检查该元素上是否定义了和绑定的 key 同名的 DOM property。如果存在同名的 property，则 Vue 会将它作为 DOM property 赋值，而不是作为 attribute 设置。
+
+  ```
+  <li v-for="g in games" v-bind:key="g.id">{{ g.name }}</li>
+  v-bind:key 可直接写成 :key
+  ```
+
+  
+
+## let
+
+`let` 用于声明一个变量 这个变量能够存储数据
+
+`let` 声明的变量具有块级作用域。也就是说，变量的作用范围仅限于声明它的代码块内部
 
 # vite介绍
 
@@ -538,4 +582,122 @@ export default {
 
 </style>
 ```
+
+
+
+# ref创建_基本类型的响应式数据
+
+可以定义：基本类型，对象类型的响应式数据
+
+ref 对象是可更改的，也就是说你可以为 `.value` 赋予新的值。它也是响应式的，即所有对 `.value` 的操作都将被追踪，并且写操作会触发与之相关的副作用。
+
+**作用**：定义响应式变量。
+
+**语法**：let xxx = ref(初始值)
+
+**返回值**：一个 RefImpl 的实例对象，简称ref对象或ref，ref对象的value属性是响应式的。
+
+**注意点**：
+
+- JS中操作数据需要：xxx.value，但模板中不需要.value，直接使用即可。
+- 对于let name = ref('张三')来说,name不是响应式的，name.value是响应式的。
+
+
+
+
+
+# reative创建_对象类型的响应式数据
+
+只能定义：对象类型的响应式数据
+
+```
+reactive({brand:'奔驰',price:100}) 这是响应式对象
+{brand:'奔驰',price:100} 这是源对象
+```
+
+
+
+Person.vue
+
+```vue
+<template>
+    <div class="person">
+        <h2>汽车信息：一辆{{car.brand}}车，价值{{car.price}}万</h2>
+        <button @click="changePrice">修改汽车价格</button>
+        <br>
+        <h2>游戏列表：</h2>
+        <ul>
+            <li v-for="g in games" v-bind:key="g.id">{{ g.name }}</li>
+        </ul>
+        <button @click="changegames">修改第一个游戏名称</button>
+        <h2>测试:{{ obj.a.b.c }}</h2>
+        <button @click="changeobj">修改测试</button>
+    </div>
+</template>
+
+<script lang="ts" setup name="Person">
+import { reactive } from 'vue';
+// 数据
+let car = reactive({brand:'奔驰',price:100})
+let games = reactive([
+    {id:'aysdytfsatr01',name:'LOL'},
+    {id:'aysdytfsatr02',name:'原神'},
+    {id:'aysdytfsatr03',name:'CS2'}
+])
+let obj = reactive({
+    a:{
+        b:{
+            c:667
+        }
+    }
+})
+
+// 方法
+function changePrice(){
+    car.price -= 10
+}
+
+function changegames(){
+    games[0].name = 'csgo'
+}
+
+function changeobj(){
+    obj.a.b.c = 999
+}
+</script>
+
+<style scoped>
+.person{
+    background-color:skyblue;
+    box-shadow: 0 0 10px;
+    border-radius: 10px;
+    padding: 20px;
+}
+    button{
+        margin: 0 5px;
+    }
+
+    li {
+        font-size: 20px;
+    }
+</style>
+```
+
+
+
+# ref创建_对象类型的响应式数据
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
